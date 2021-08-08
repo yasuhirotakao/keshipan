@@ -1,14 +1,14 @@
-# keshipan
+# fluentd のプライグイン個人情報削除keshipan
 ## プログラム本体
 plugin/filter_keshipan.rb
  -> /etc/td-agent/plugin/filter_keshipan.rb
 
-##サンプル設定
+## サンプル設定
  td-agent.conf
  -> /etc/td-agent
 
 
-##個人情報ファイル
+## 個人情報ファイル
  配置場所 /etc/td-agent/plugin/
 ### クレジットカード番号のBINレンジ毎に編集が必要
 keshipan_bin.dat
