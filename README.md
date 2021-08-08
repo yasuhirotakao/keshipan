@@ -1,4 +1,6 @@
 # fluentd のプライグイン個人情報削除keshipan
+
+
 ## プログラム本体
 plugin/filter_keshipan.rb
  -> /etc/td-agent/plugin/filter_keshipan.rb
