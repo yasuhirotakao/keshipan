@@ -1,0 +1,23 @@
+<source>
+  type tail
+  path /var/log/messages
+  tag syslog.messages
+  pos_file /var/log/td-agent/var-log-messages.pos
+  read_from_head true
+  path_key tailed_path
+  format none
+</source>
+<filter *.**>
+  type record_transformer
+  <record>
+    host ${hostname}
+  </record>
+</filter>
+<match **>
+  type forward
+  flush_interval 1s
+  <server>
+    host 192.168.56.112
+    port 24224
+  </server>
+</match>
