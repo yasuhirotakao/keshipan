@@ -16,6 +16,8 @@
 require 'fluent/plugin/filter'
 require 'fluent/config/error'
 require 'fluent/plugin/string_util'
+require 'syslog/logger'
+require 'json'
 
 module Fluent::Plugin
   class GrepFilter < Filter
@@ -25,6 +27,8 @@ module Fluent::Plugin
     @@email_check=false
     @@pan_check=false
     @@bin_regex_condtions=[]
+    @@syslog = Syslog::Logger.new 'fluent/keshipan'
+    @@syslog.info 'this line will be logged via syslog(3)'
     def initialize
       super
       @@dict_condtions=[]
@@ -96,12 +100,11 @@ module Fluent::Plugin
           match_flg=false
           msg=record["message"].to_s.downcase
 	  @@single_byte_dict_condtions.each { |word| 
-	      if msg.gsub!(word,'****') 
+	      if msg.gsub!(word,'***single byte match***') 
                    match_flg=true
               end
 	  }
           if match_flg
-             log.info "dictionary match!!"
 	     personal_info_flg=true
 	     record["message"]=msg
           end
@@ -112,12 +115,11 @@ module Fluent::Plugin
               match_flg=false
               msg=record["message"].to_s.force_encoding('UTF-8')
               @@multi_byte_dict_condtions.each { |word| 
-    	          if msg.gsub!(word,'****') 
+    	          if msg.gsub!(word,'***multi byte match***') 
                        match_flg=true
                   end
     	      }
               if match_flg
-                  log.info "dictionary match!!"
                   personal_info_flg=true
                   record["message"]=msg
               end
@@ -125,8 +127,7 @@ module Fluent::Plugin
       end
       if @@email_check
           msg=record["message"].to_s.downcase
-	  if msg.gsub!(/([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})/,"********")
-              log.info "email address match!!"
+	  if msg.gsub!(/([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})/,"***email match***")
 	      personal_info_flg=true
 	      record["message"]=msg
 	  end   
@@ -135,18 +136,17 @@ module Fluent::Plugin
 	  msg=record["message"].to_s
           match_flg=false
 	  @@bin_regex_condtions.each { |jouken| 
-	      if msg.gsub!(/#{jouken}/,"****************")
+	      if msg.gsub!(/#{jouken}/,"***pan match****")
                   match_flg=true
 	      end   
 	  }
           if match_flg
-             log.info "pan match!!"
 	     personal_info_flg=true
 	     record["message"]=msg
           end
       end 
       if personal_info_flg
-	      log.error "KESHIPAN personal info match!! msg:"+record["message"].to_s
+	  @@syslog.error "KESHIPAN personal info match!! msg:"+JSON.generate(record)
       end
       return record
     end
