@@ -1,15 +1,28 @@
 <source>
   type tail
   path /var/log/messages
-  tag syslog.messages
+  # タグの命名規約
+  # アプリケーション  app.プラットフォーム名-開発元
+  #                   例： app.kpf-dts
+  # os                sys.ファイル名
+  #                   例： os.
+  # mw                ミドルウェア名.ファイル名
+  #                   fluent.td-agent
+  # network           通信機器名.log 
+  #                   通信機器名.snmp
+  #
+  tag os.messages
   pos_file /var/log/td-agent/var-log-messages.pos
   read_from_head true
+  # ログ上にどのファイルから呼び込んだかわかるように付加
   path_key tailed_path
+  # messageは加工せずにそのまま、messageに格納
   format none
 </source>
 <filter *.**>
   type record_transformer
   <record>
+    # ログ上にどのHOSTから呼び込んだかわかるように付加
     host ${hostname}
   </record>
 </filter>
